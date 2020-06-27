@@ -10,19 +10,20 @@
   },
   "scripts": {
     "postinstall": "curl -s https://raw.githubusercontent.com/reactorcore/pomander/master/bin/install | bash && ./node_modules/.bin/jsdoc ./server -r -d docs",
-    "start": "nodemon --ignore node_modules server",
+    "start": "nodemon ./server/index.js --ignore node_modules server",
     "test": "mocha --bail --reporter nyan test/ServerSpec.js; pkill -n node;",
     "lint": "eslint ./"
   },
   "dependencies": {
     "bluebird": "^3.3.4",
-    "body-parser": "^1.15.0",
+    "body-parser": "^1.19.0",
     "ejs": "^2.4.1",
-    "express": "^4.13.4",
+    "express": "^4.17.1",
     "express-partials": "^0.3.0",
     "lodash": "^4.17.4",
     "mysql": "^2.12.0",
     "node-mocks-http": "^1.6.1",
+    "nodemon": "^2.0.4",
     "request": "^2.34.0"
   },
   "devDependencies": {

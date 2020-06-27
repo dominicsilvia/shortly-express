@@ -123,7 +123,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Account Creation:', function() {
+  describe('Account Creation:', function() {
 
     it('signup creates a new user record', function(done) {
       var options = {
@@ -208,7 +208,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Account Login:', function() {
+  describe('Account Login:', function() {
 
     beforeEach(function(done) {
       var options = {
@@ -254,6 +254,7 @@ describe('', function() {
 
       request(options, function(error, res, body) {
         if (error) { return done(error); }
+        console.log('location headers ------------>', res.headers);
         expect(res.headers.location).to.equal('/login');
         done();
       });
@@ -610,7 +611,7 @@ describe('', function() {
       }
     };
 
-    xbeforeEach(function(done) {
+    beforeEach(function(done) {
       var options = {
         'method': 'POST',
         'followAllRedirects': true,
@@ -627,7 +628,7 @@ describe('', function() {
       requestWithSession('http://127.0.0.1:4568/logout', done);
     });
 
-    describe('Creating new links:', function(done) {
+    xdescribe('Creating new links:', function(done) {
 
       it('Only shortens valid urls, returning a 404 - Not found for invalid urls', function(done) {
         var options = {
@@ -686,7 +687,7 @@ describe('', function() {
       });
     });
 
-    describe('With previously saved urls:', function() {
+    xdescribe('With previously saved urls:', function() {
 
       var link;
 

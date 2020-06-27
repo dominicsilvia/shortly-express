@@ -17,66 +17,126 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 
 
-app.get('/', 
-(req, res) => {
-  res.render('index');
-});
+app.get('/',
+  (req, res) => {
+    res.render('index');
+  });
 
-app.get('/create', 
-(req, res) => {
-  res.render('index');
-});
+app.get('/create',
+  (req, res) => {
+    res.render('index');
+  });
 
-app.get('/links', 
-(req, res, next) => {
-  models.Links.getAll()
-    .then(links => {
-      res.status(200).send(links);
-    })
-    .error(error => {
-      res.status(500).send(error);
-    });
-});
-
-app.post('/links', 
-(req, res, next) => {
-  var url = req.body.url;
-  if (!models.Links.isValidUrl(url)) {
-    // send back a 404 if link is not valid
-    return res.sendStatus(404);
-  }
-
-  return models.Links.get({ url })
-    .then(link => {
-      if (link) {
-        throw link;
-      }
-      return models.Links.getUrlTitle(url);
-    })
-    .then(title => {
-      return models.Links.create({
-        url: url,
-        title: title,
-        baseUrl: req.headers.origin
+app.get('/links',
+  (req, res, next) => {
+    models.Links.getAll()
+      .then(links => {
+        res.status(200).send(links);
+      })
+      .error(error => {
+        res.status(500).send(error);
       });
-    })
-    .then(results => {
-      return models.Links.get({ id: results.insertId });
-    })
-    .then(link => {
-      throw link;
-    })
-    .error(error => {
-      res.status(500).send(error);
-    })
-    .catch(link => {
-      res.status(200).send(link);
-    });
-});
+  });
+
+app.post('/links',
+  (req, res, next) => {
+    var url = req.body.url;
+    if (!models.Links.isValidUrl(url)) {
+      // send back a 404 if link is not valid
+      return res.sendStatus(404);
+    }
+
+    return models.Links.get({ url })
+      .then(link => {
+        if (link) {
+          throw link;
+        }
+        return models.Links.getUrlTitle(url);
+      })
+      .then(title => {
+        return models.Links.create({
+          url: url,
+          title: title,
+          baseUrl: req.headers.origin
+        });
+      })
+      .then(results => {
+        return models.Links.get({ id: results.insertId });
+      })
+      .then(link => {
+        throw link;
+      })
+      .error(error => {
+        res.status(500).send(error);
+      })
+      .catch(link => {
+        res.status(200).send(link);
+      });
+  });
 
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.get('/login', (req, res, next) => {
+  //render login page
+  res.render('login');
+
+});
+
+app.get('/signup', (req, res, next) => {
+  //render signup page
+  res.render('signup');
+  //console.log('get signup');
+
+});
+
+
+app.post('/login', (req, res, next) => {
+  //console.log('login req ------------------>', req);
+  //get password and salt for entered username
+  //compare entered password with one supplied by user
+  models.Users.get({ username: req.body.username })
+    .then(results => {
+      if (results) {
+        return models.Users.compare(req.body.password, results.password, results.salt);
+      } else {
+        return false;
+      }
+    })
+    .then(isValid => {
+      if (isValid) {
+        //redirect to index
+        res.redirect('/');
+      } else {
+        //redirect to login
+
+        res.redirect('/login');
+        //console.log('response location', res.location());
+      }
+    }).catch(error => res.status(400).send(error));
+
+
+});
+
+app.post('/signup', (req, res, next) => {
+  //lookup username in database, if exists, take to login page and give error msg?
+  //console.log('req ------------------>', req);
+  //write values to the user table
+
+  models.Users.get({ username: req.body.username })
+    .then(results => {
+      if (!results) {
+        //user is not in database - sign up
+        models.Users.create({ username: req.body.username, password: req.body.password })
+          .then(result => res.redirect('/'))
+          .catch(error => res.status(500).send(error));
+      } else {
+        //user is already in database, redirect to login page
+        res.redirect('/signup');
+      }
+    });
+});
+
 
 
 

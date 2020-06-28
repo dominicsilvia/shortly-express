@@ -5,6 +5,7 @@ const partials = require('express-partials');
 const bodyParser = require('body-parser');
 const Auth = require('./middleware/auth');
 const models = require('./models');
+const cookieParser = require('./middleware/cookieParser');
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(partials());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
+app.use(cookieParser);
 
 
 
@@ -107,7 +109,7 @@ app.post('/login', (req, res, next) => {
         res.redirect('/');
       } else {
         //redirect to login
-        res.redirect('/login');
+        res.redirect(401, '/login');
       }
     }).catch(error => res.status(400).send(error));
 

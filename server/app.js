@@ -86,8 +86,6 @@ app.get('/login', (req, res, next) => {
 app.get('/signup', (req, res, next) => {
   //render signup page
   res.render('signup');
-  //console.log('get signup');
-
 });
 
 
@@ -109,9 +107,7 @@ app.post('/login', (req, res, next) => {
         res.redirect('/');
       } else {
         //redirect to login
-
         res.redirect('/login');
-        //console.log('response location', res.location());
       }
     }).catch(error => res.status(400).send(error));
 
@@ -119,9 +115,6 @@ app.post('/login', (req, res, next) => {
 });
 
 app.post('/signup', (req, res, next) => {
-  //lookup username in database, if exists, take to login page and give error msg?
-  //console.log('req ------------------>', req);
-  //write values to the user table
 
   models.Users.get({ username: req.body.username })
     .then(results => {

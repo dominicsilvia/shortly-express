@@ -14,8 +14,10 @@ app.set('view engine', 'ejs');
 app.use(partials());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '../public')));
 app.use(cookieParser);
+app.use(Auth.createSession);
+app.use(express.static(path.join(__dirname, '../public')));
+
 
 
 
@@ -95,9 +97,12 @@ app.post('/login', (req, res, next) => {
   //console.log('login req ------------------>', req);
   //get password and salt for entered username
   //compare entered password with one supplied by user
-  models.Users.get({ username: req.body.username })
+  return models.Users.get({ username: req.body.username })
     .then(results => {
       if (results) {
+        req.session.userId = results.id;
+        console.log('session in login ------------>', req.session);
+        console.log('results in login ----------------->', results);
         return models.Users.compare(req.body.password, results.password, results.salt);
       } else {
         return false;
@@ -107,6 +112,10 @@ app.post('/login', (req, res, next) => {
       if (isValid) {
         //redirect to index
         res.redirect('/');
+        return models.Sessions.update({ id: req.session.id }, { userId: req.session.userId });
+        //update the session record with userID of the user who logged in
+        //userID
+
       } else {
         //redirect to login
         res.redirect(401, '/login');
@@ -123,13 +132,33 @@ app.post('/signup', (req, res, next) => {
       if (!results) {
         //user is not in database - sign up
         models.Users.create({ username: req.body.username, password: req.body.password })
-          .then(result => res.redirect('/'))
+          .then(result => {
+            //console.log('result from signeup', result);
+            //console.log('req session from signup --->', req.session);
+            res.redirect('/');
+            return models.Sessions.update({ id: req.session.id }, { userId: result.insertId });
+          })
           .catch(error => res.status(500).send(error));
       } else {
         //user is already in database, redirect to login page
         res.redirect('/signup');
       }
     });
+});
+
+
+app.get('/logout', (req, res, next) => {
+  //delete cookie
+  res.clearCookie('shortlyid');
+  //console.log('session in logout -------------->', req.session);
+  //delete session from sessions table
+  return models.Sessions.delete({ id: req.session.id })
+    .then(() => {
+      // res.redirect('/login');
+      //window.location.href = '/login';
+      next();
+    })
+    .catch(error => console.log('error logging out', error));
 });
 
 

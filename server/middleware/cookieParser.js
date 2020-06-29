@@ -13,7 +13,6 @@ const parseCookies = (req, res, next) => {
       parsedCookies[parsedCookie[0]] = parsedCookie[1];
     });
 
-    console.log('Parsed Cookies ---->', parsedCookies);
     //assign object to a cookies property on the request
     req.cookies = parsedCookies;
 

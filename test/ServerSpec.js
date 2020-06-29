@@ -254,7 +254,6 @@ describe('', function() {
 
       request(options, function(error, res, body) {
         if (error) { return done(error); }
-        console.log('location headers ------------>', res.headers);
         expect(res.headers.location).to.equal('/login');
         done();
       });
@@ -571,7 +570,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Privileged Access:', function() {
+  describe('Privileged Access:', function() {
 
     it('Redirects to login page if a user tries to access the main page and is not signed in', function(done) {
       request('http://127.0.0.1:4568/', function(error, res, body) {
@@ -598,7 +597,7 @@ describe('', function() {
     });
   });
 
-  xdescribe('Link creation:', function() {
+  describe('Link creation:', function() {
 
     var cookies = request.jar();
     var requestWithSession = request.defaults({ jar: cookies });
@@ -628,7 +627,7 @@ describe('', function() {
       requestWithSession('http://127.0.0.1:4568/logout', done);
     });
 
-    xdescribe('Creating new links:', function(done) {
+    describe('Creating new links:', function(done) {
 
       it('Only shortens valid urls, returning a 404 - Not found for invalid urls', function(done) {
         var options = {
@@ -687,7 +686,7 @@ describe('', function() {
       });
     });
 
-    xdescribe('With previously saved urls:', function() {
+    describe('With previously saved urls:', function() {
 
       var link;
 

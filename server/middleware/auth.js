@@ -86,3 +86,8 @@ module.exports.createSession = (req, res, next) => {
 // Add additional authentication middleware functions below
 /************************************************************/
 
+module.exports.verifySession = (req, res, next) => {
+  //check to see if session is associated with a user
+  /// if so, return next();
+  return models.Sessions.isLoggedIn(req.session) ? next() : res.redirect('/login');
+};

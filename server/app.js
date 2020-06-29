@@ -21,17 +21,17 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 
 
-app.get('/',
+app.get('/', Auth.verifySession,
   (req, res) => {
     res.render('index');
   });
 
-app.get('/create',
+app.get('/create', Auth.verifySession,
   (req, res) => {
     res.render('index');
   });
 
-app.get('/links',
+app.get('/links', Auth.verifySession,
   (req, res, next) => {
     models.Links.getAll()
       .then(links => {
@@ -94,15 +94,12 @@ app.get('/signup', (req, res, next) => {
 
 
 app.post('/login', (req, res, next) => {
-  //console.log('login req ------------------>', req);
   //get password and salt for entered username
   //compare entered password with one supplied by user
   return models.Users.get({ username: req.body.username })
     .then(results => {
       if (results) {
         req.session.userId = results.id;
-        console.log('session in login ------------>', req.session);
-        console.log('results in login ----------------->', results);
         return models.Users.compare(req.body.password, results.password, results.salt);
       } else {
         return false;
@@ -133,8 +130,6 @@ app.post('/signup', (req, res, next) => {
         //user is not in database - sign up
         models.Users.create({ username: req.body.username, password: req.body.password })
           .then(result => {
-            //console.log('result from signeup', result);
-            //console.log('req session from signup --->', req.session);
             res.redirect('/');
             return models.Sessions.update({ id: req.session.id }, { userId: result.insertId });
           })
@@ -150,14 +145,9 @@ app.post('/signup', (req, res, next) => {
 app.get('/logout', (req, res, next) => {
   //delete cookie
   res.clearCookie('shortlyid');
-  //console.log('session in logout -------------->', req.session);
   //delete session from sessions table
   return models.Sessions.delete({ id: req.session.id })
-    .then(() => {
-      // res.redirect('/login');
-      //window.location.href = '/login';
-      next();
-    })
+    .then(() => next())
     .catch(error => console.log('error logging out', error));
 });
 

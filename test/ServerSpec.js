@@ -733,6 +733,75 @@ describe('', function() {
         });
       });
 
+      //---------------------------------------------
+      it('Increments link visits when clicked', function(done) {
+        var options = {
+          'method': 'GET',
+          'uri': 'http://127.0.0.1:4568/' + link.code
+        };
+
+        var origCount;
+        var newCount;
+
+        var queryString = 'Select visits from links where code = ?';
+        db.query(queryString, [link.code], function(err, results) {
+          origCount = results[0].visits;
+        });
+
+        requestWithSession(options, function(error, res, body) {
+          if (error) { return done(error); }
+
+          db.query(queryString, [link.code], function(err, results) {
+            newCount = results[0].visits;
+            expect(newCount).to.equal(origCount + 1);
+          });
+
+          done();
+        });
+      });
+
+      it('Adds record to clicks table when clicked', function(done) {
+        var options = {
+          'method': 'GET',
+          'uri': 'http://127.0.0.1:4568/' + link.code
+        };
+
+        var queryString = 'Select * from clicks';
+
+        requestWithSession(options, function(error, res, body) {
+          if (error) { return done(error); }
+
+          db.query(queryString, function(err, results) {
+            expect(results.length).to.equal(1);
+          });
+
+          done();
+        });
+      });
+
+      it('Joins clicks and links tables', function(done) {
+        var options = {
+          'method': 'GET',
+          'uri': 'http://127.0.0.1:4568/' + link.code
+        };
+
+        var queryString = 'Select * from clicks left join links where clicks.linkId = links.code';
+
+        requestWithSession(options, function(error, res, body) {
+          if (error) { return done(error); }
+
+          db.query(queryString, function(err, results) {
+            expect(results.length).to.equal(1);
+            expect(results[0].url).to.exist;
+          });
+
+          done();
+        });
+      });
+
+
+      //--------------------------------------------
+
       it('Shortcode redirects to index if shortcode does not exist', function(done) {
         var options = {
           'method': 'GET',
